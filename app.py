@@ -12,17 +12,25 @@ class Data(db.Model):
     name = db.Column(db.String(100))
     email = db.Column(db.String(100))
     phone = db.Column(db.String(100))
-
-    def __init__(self, name, email, phone):
+    id_kategori = db.Column(db.Integer, db.ForeignKey('category.id'))
+    def __init__(self, name, email, phone, id_kategori):
         self.name = name
         self.email = email
         self.phone = phone
-         
+        self.id_kategori = id_kategori
+        
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key= True)
+    kategori = db.Column(db.String(100))
+
+    def __init__(self, kategori):
+        self.kategori = kategori
 
 @app.route('/')
 def index():
     all_data = Data.query.all()
-    return render_template('index.html',employees = all_data)
+    all_category=Category.query.all()
+    return render_template('index.html',employees = all_data, categories=all_category)
 
 @app.route('/insert', methods = ['POST'])
 def insert():
@@ -30,8 +38,9 @@ def insert():
         name = request.form['name']
         email = request.form['email']
         phone = request.form['phone']
+        id_kategori = request.form['category']
         
-        my_data = Data(name, email, phone)
+        my_data = Data(name, email, phone,id_kategori)
         db.session.add(my_data)
         db.session.commit()
 
@@ -47,6 +56,7 @@ def update():
         my_data.name = request.form['name']
         my_data.email = request.form['email']
         my_data.phone = request.form['phone']
+        my_data.id_kategori = request.form['category']
 
         db.session.commit()
         flash("Employee Updated Successfully")
